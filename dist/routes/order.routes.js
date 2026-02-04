@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const asyncHandler_1 = require("../utils/asyncHandler");
+const order_controller_1 = require("../controllers/order.controller");
+const router = (0, express_1.Router)();
+router.post("/create-order", (0, asyncHandler_1.asyncHandler)(order_controller_1.addOrder));
+router.get("/get-order/farmer/:id", (0, asyncHandler_1.asyncHandler)(order_controller_1.getOrderFarmer));
+router.get("/get-order/buyer/:id", (0, asyncHandler_1.asyncHandler)(order_controller_1.getOrderBuyer));
+router.get("/get-order/:id", (0, asyncHandler_1.asyncHandler)(order_controller_1.viewOrder));
+router.patch("/confirm-order/:orderId", (0, asyncHandler_1.asyncHandler)(order_controller_1.confirmOrder));
+router.patch("/cancel-order/:orderId", (0, asyncHandler_1.asyncHandler)(order_controller_1.cancelOrder));
+router.patch("/confirm-delivery/:id", (0, asyncHandler_1.asyncHandler)(order_controller_1.confirmDelivery));
+router.patch("/setoutFor-delivered/:id", (0, asyncHandler_1.asyncHandler)(order_controller_1.setOutForDelivery));
+exports.default = router;

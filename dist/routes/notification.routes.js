@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const asyncHandler_1 = require("../utils/asyncHandler");
+const notification_controller_1 = require("../controllers/notification.controller");
+const router = (0, express_1.Router)();
+router.post("/send-notification", (0, asyncHandler_1.asyncHandler)(notification_controller_1.sendNotification));
+router.get("/get-notification/:id", (0, asyncHandler_1.asyncHandler)(notification_controller_1.getNotification));
+router.patch("/read-notification/:id", (0, asyncHandler_1.asyncHandler)(notification_controller_1.updateRead));
+router.delete("/delete-notification/:id", (0, asyncHandler_1.asyncHandler)(notification_controller_1.deleteNotification));
+exports.default = router;

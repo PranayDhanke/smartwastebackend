@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const buyer_auth_controller_1 = require("../controllers/buyer.auth.controller");
+const asyncHandler_1 = require("../utils/asyncHandler");
+const router = (0, express_1.Router)();
+router.post("/create-account", (0, asyncHandler_1.asyncHandler)(buyer_auth_controller_1.createBuyerAccount));
+router.get("/get-account/:id", (0, asyncHandler_1.asyncHandler)(buyer_auth_controller_1.getBuyerAccount));
+router.put("/update-account/:id", (0, asyncHandler_1.asyncHandler)(buyer_auth_controller_1.updateBuyerAccount));
+exports.default = router;

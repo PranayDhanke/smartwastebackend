@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const farmer_auth_controller_1 = require("../controllers/farmer.auth.controller");
+const asyncHandler_1 = require("../utils/asyncHandler");
+const router = (0, express_1.Router)();
+router.post("/create-account", (0, asyncHandler_1.asyncHandler)(farmer_auth_controller_1.createFarmerAccount));
+router.get("/get-account/:id", (0, asyncHandler_1.asyncHandler)(farmer_auth_controller_1.getFarmerAccount));
+router.put("/update-account/:id", (0, asyncHandler_1.asyncHandler)(farmer_auth_controller_1.updateFarmerAccount));
+exports.default = router;

@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const asyncHandler_1 = require("../utils/asyncHandler");
+const waste_controller_1 = require("../controllers/waste.controller");
+const router = (0, express_1.Router)();
+router.post("/create-waste", (0, asyncHandler_1.asyncHandler)(waste_controller_1.addWaste));
+router.get("/get-wastes", (0, asyncHandler_1.asyncHandler)(waste_controller_1.getWaste));
+router.get("/get-single/:id", (0, asyncHandler_1.asyncHandler)(waste_controller_1.getSingleWaste));
+router.get("/get-waste/:id", (0, asyncHandler_1.asyncHandler)(waste_controller_1.getWastebyId));
+router.put("/update-waste/:id", (0, asyncHandler_1.asyncHandler)(waste_controller_1.updateWaste));
+router.delete("/delete/:id", (0, asyncHandler_1.asyncHandler)(waste_controller_1.deleteWaste));
+exports.default = router;

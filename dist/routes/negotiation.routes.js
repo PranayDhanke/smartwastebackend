@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const negotiation_controller_1 = require("../controllers/negotiation.controller");
+const express_2 = require("@clerk/express");
+const asyncHandler_1 = require("../utils/asyncHandler");
+const router = (0, express_1.Router)();
+router.post("/add-negotiation", (0, express_2.requireAuth)(), (0, asyncHandler_1.asyncHandler)(negotiation_controller_1.listNegotiations));
+router.get("/get-negotiation/farmer/:id", (0, asyncHandler_1.asyncHandler)(negotiation_controller_1.getNegotiationsByFarmer));
+router.get("/get-negotiation/buyer/:id", (0, asyncHandler_1.asyncHandler)(negotiation_controller_1.getNegotiationsByBuyer));
+router.patch("/update-status", (0, asyncHandler_1.asyncHandler)(negotiation_controller_1.updateNegotiationStatus));
+exports.default = router;
