@@ -4,8 +4,7 @@ import { translateText } from "../lib/azureTranslation";
 import { AppError } from "../utils/AppError";
 
 export const addWaste = async (req: Request, res: Response) => {
-  console.log("createwaste" , req.headers);
-  
+
   const data = await req.body;
 
 
@@ -32,8 +31,7 @@ export const addWaste = async (req: Request, res: Response) => {
 };
 
 export const getWastebyId = async (req: Request, res: Response) => {
-  console.log(req.headers);
-  
+
   const id = req.params.id;
 
   if (!id) {
