@@ -3,7 +3,7 @@ import { mongoConnect } from "./lib/db";
 import { initSocket } from "./lib/socket";
 import http from "http";
 
-const PORT = 5000;
+const PORT = 8080;
 
 const startServer = async () => {
   const server = http.createServer(app);
@@ -16,7 +16,7 @@ const startServer = async () => {
     res.json({ message: "Server is running" });
   });
 
-  server.listen(PORT, () => {
+  server.listen(PORT, "0.0.0.0" , () => {
     console.log(`Server is running on ${PORT}`);
   });
 };
