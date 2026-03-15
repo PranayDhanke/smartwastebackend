@@ -9,6 +9,8 @@ router.get("/get-order/farmer/:id", (0, asyncHandler_1.asyncHandler)(order_contr
 router.get("/get-order/buyer/:id", (0, asyncHandler_1.asyncHandler)(order_controller_1.getOrderBuyer));
 router.get("/get-order/:id", (0, asyncHandler_1.asyncHandler)(order_controller_1.viewOrder));
 router.patch("/confirm-order/:orderId", (0, asyncHandler_1.asyncHandler)(order_controller_1.confirmOrder));
+router.patch("/delivery-charge/:orderId", (0, asyncHandler_1.asyncHandler)(order_controller_1.setDeliveryCharge));
+router.patch("/review-price/:orderId", (0, asyncHandler_1.asyncHandler)(order_controller_1.reviewOrderPrice));
 router.patch("/cancel-order/:orderId", (0, asyncHandler_1.asyncHandler)(order_controller_1.cancelOrder));
 router.patch("/confirm-delivery/:id", (0, asyncHandler_1.asyncHandler)(order_controller_1.confirmDelivery));
 router.patch("/setoutFor-delivered/:id", (0, asyncHandler_1.asyncHandler)(order_controller_1.setOutForDelivery));

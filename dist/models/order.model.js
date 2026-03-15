@@ -35,9 +35,9 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const translatedStringSchema = {
-    en: { type: String, required: true },
-    hi: { type: String, required: true },
-    mr: { type: String, required: true },
+    en: { type: String },
+    hi: { type: String },
+    mr: { type: String },
 };
 const OrderSchema = new mongoose_1.Schema({
     buyerId: { type: String, required: true },
@@ -45,8 +45,27 @@ const OrderSchema = new mongoose_1.Schema({
     isDelivered: { type: Boolean, required: true, default: false },
     farmerId: { type: String, required: true },
     isOutForDelivery: { type: Boolean, required: true, default: false },
+    subTotalAmount: { type: Number, required: true },
     totalAmount: { type: Number, required: true },
+    deliveryCharge: { type: Number, required: true, default: 0 },
     deliveryMode: { type: String, required: true },
+    pricingStatus: {
+        type: String,
+        enum: [
+            "not_required",
+            "pending_farmer_input",
+            "pending_buyer_review",
+            "accepted",
+            "rejected",
+        ],
+        default: "not_required",
+    },
+    deliverySecretCode: { type: String, required: true },
+    deliveryCodeRecipient: {
+        type: String,
+        enum: ["buyer", "farmer"],
+        required: true,
+    },
     paymentId: { type: String, required: false },
     buyerInfo: {
         buyerMobile: { type: String, required: true },
@@ -63,14 +82,14 @@ const OrderSchema = new mongoose_1.Schema({
     items: [
         {
             prodId: { type: String, required: true },
-            title: translatedStringSchema,
+            title: { type: translatedStringSchema, required: true },
             wasteType: { type: String, required: true },
             wasteProduct: { type: String, required: true },
             moisture: { type: String, required: true },
             quantity: { type: Number, required: true },
             price: { type: Number, required: true },
             unit: { type: String, required: true },
-            description: translatedStringSchema,
+            description: { type: translatedStringSchema },
             image: { type: String, required: true },
             sellerInfo: {
                 seller: {

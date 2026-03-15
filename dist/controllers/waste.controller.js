@@ -8,7 +8,6 @@ const waste_model_1 = __importDefault(require("../models/waste.model"));
 const azureTranslation_1 = require("../lib/azureTranslation");
 const AppError_1 = require("../utils/AppError");
 const addWaste = async (req, res) => {
-    console.log("createwaste", req.headers);
     const data = await req.body;
     if (!data) {
         throw new AppError_1.AppError("Waste data not found", 500);
@@ -29,7 +28,6 @@ const addWaste = async (req, res) => {
 };
 exports.addWaste = addWaste;
 const getWastebyId = async (req, res) => {
-    console.log(req.headers);
     const id = req.params.id;
     if (!id) {
         throw new AppError_1.AppError("Id not Provided", 500);

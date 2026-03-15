@@ -3,11 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.viewOrder = exports.setOutForDelivery = exports.getOrderFarmer = exports.getOrderBuyer = exports.confirmDelivery = exports.cancelOrder = exports.confirmOrder = exports.addOrder = void 0;
+exports.viewOrder = exports.setOutForDelivery = exports.getOrderFarmer = exports.getOrderBuyer = exports.reviewOrderPrice = exports.setDeliveryCharge = exports.confirmDelivery = exports.cancelOrder = exports.confirmOrder = exports.addOrder = void 0;
 const AppError_1 = require("../utils/AppError");
 const waste_model_1 = __importDefault(require("../models/waste.model"));
 const order_model_1 = __importDefault(require("../models/order.model"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const generateSixDigitCode = () => Math.floor(100000 + Math.random() * 900000).toString();
 const addOrder = async (req, res) => {
     const data = await req.body.data;
     if (!data) {
@@ -50,8 +51,15 @@ const addOrder = async (req, res) => {
             buyerId: frontendOrder.buyerId,
             farmerId: frontendOrder.farmerId,
             items: validatedItems,
+            subTotalAmount: totalAmount,
             totalAmount,
+            deliveryCharge: 0,
             deliveryMode: frontendOrder.deliveryMode,
+            pricingStatus: frontendOrder.deliveryMode === "DELIVERYBYFARMER"
+                ? "pending_farmer_input"
+                : "not_required",
+            deliverySecretCode: generateSixDigitCode(),
+            deliveryCodeRecipient: frontendOrder.deliveryMode === "DELIVERYBYFARMER" ? "buyer" : "farmer",
             buyerInfo: frontendOrder.buyerInfo,
             // backend controlled
             status: "pending",
@@ -88,6 +96,10 @@ const confirmOrder = async (req, res, next) => {
             .session(session);
         if (!order) {
             throw new AppError_1.AppError("Order not found or already processed", 404);
+        }
+        if (order.deliveryMode === "DELIVERYBYFARMER" &&
+            order.pricingStatus !== "accepted") {
+            throw new AppError_1.AppError("Buyer must approve the delivery charge before confirmation", 409);
         }
         /**
          * 2️⃣ Validate stock for ALL items
@@ -149,13 +161,89 @@ const cancelOrder = async (req, res, next) => {
 exports.cancelOrder = cancelOrder;
 const confirmDelivery = async (req, res) => {
     const id = req.params.id;
+    const secretCode = String(req.body?.secretCode || "").trim();
     if (!id) {
         throw new AppError_1.AppError("Id not Provided", 500);
     }
-    await order_model_1.default.findByIdAndUpdate(id, { isDelivered: true }, { new: true });
+    if (!secretCode) {
+        throw new AppError_1.AppError("Secret code is required", 400);
+    }
+    const order = await order_model_1.default.findById(id);
+    if (!order) {
+        throw new AppError_1.AppError("Order not found", 404);
+    }
+    if (order.deliverySecretCode !== secretCode) {
+        throw new AppError_1.AppError("Invalid secret code", 400);
+    }
+    order.isDelivered = true;
+    await order.save();
     res.status(200).json("Order has been successfully delivered");
 };
 exports.confirmDelivery = confirmDelivery;
+const setDeliveryCharge = async (req, res) => {
+    const { orderId } = req.params;
+    const deliveryCharge = Number(req.body?.deliveryCharge);
+    if (!orderId) {
+        throw new AppError_1.AppError("Id not Provided", 500);
+    }
+    if (Number.isNaN(deliveryCharge) || deliveryCharge < 0) {
+        throw new AppError_1.AppError("Valid delivery charge is required", 400);
+    }
+    const order = await order_model_1.default.findById(orderId);
+    if (!order) {
+        throw new AppError_1.AppError("Order not found", 404);
+    }
+    if (order.deliveryMode !== "DELIVERYBYFARMER") {
+        throw new AppError_1.AppError("Delivery charge is only allowed for farmer delivery", 400);
+    }
+    if (order.status !== "pending") {
+        throw new AppError_1.AppError("Delivery charge can only be set for pending orders", 409);
+    }
+    order.deliveryCharge = deliveryCharge;
+    order.totalAmount = order.subTotalAmount + deliveryCharge;
+    order.pricingStatus = "pending_buyer_review";
+    await order.save();
+    res.status(200).json({
+        message: "Delivery charge sent to buyer",
+        order,
+    });
+};
+exports.setDeliveryCharge = setDeliveryCharge;
+const reviewOrderPrice = async (req, res) => {
+    const { orderId } = req.params;
+    const action = req.body?.action;
+    if (!orderId) {
+        throw new AppError_1.AppError("Id not Provided", 500);
+    }
+    if (action !== "accept" && action !== "reject") {
+        throw new AppError_1.AppError("Valid review action is required", 400);
+    }
+    const order = await order_model_1.default.findById(orderId);
+    if (!order) {
+        throw new AppError_1.AppError("Order not found", 404);
+    }
+    if (order.deliveryMode !== "DELIVERYBYFARMER") {
+        throw new AppError_1.AppError("Price review is only required for farmer delivery", 400);
+    }
+    if (order.pricingStatus !== "pending_buyer_review") {
+        throw new AppError_1.AppError("There is no pending delivery quote to review", 409);
+    }
+    if (action === "accept") {
+        order.pricingStatus = "accepted";
+    }
+    else {
+        order.pricingStatus = "rejected";
+        order.status = "cancelled";
+    }
+    await order.save();
+    res.status(200).json({
+        message: action === "accept"
+            ? "Buyer accepted the delivery price"
+            : "Buyer rejected the delivery price",
+        order,
+    });
+};
+exports.reviewOrderPrice = reviewOrderPrice;
 const getOrderBuyer = async (req, res) => {
     const { cursor } = req.query;
     const limit = Math.min(parseInt(req.query.limit) | 10, 50);
